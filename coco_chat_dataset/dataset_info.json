@@ -1,0 +1,61 @@
+{
+  "builder_name": "parquet",
+  "citation": "",
+  "config_name": "default",
+  "dataset_name": "coco2017",
+  "dataset_size": 66849906,
+  "description": "",
+  "download_checksums": {
+    "hf://datasets/phiyodr/coco2017@036f3f8291db64d17faad9b09e59dd30bb65c4d7/data/train-00000-of-00001-0084e041f1902997.parquet": {
+      "num_bytes": 28909052,
+      "checksum": null
+    },
+    "hf://datasets/phiyodr/coco2017@036f3f8291db64d17faad9b09e59dd30bb65c4d7/data/validation-00000-of-00001-e3c37e369512a3aa.parquet": {
+      "num_bytes": 1261075,
+      "checksum": null
+    }
+  },
+  "download_size": 30170127,
+  "features": {
+    "messages": {
+      "feature": {
+        "content": {
+          "dtype": "string",
+          "_type": "Value"
+        },
+        "role": {
+          "dtype": "string",
+          "_type": "Value"
+        }
+      },
+      "_type": "List"
+    },
+    "image_path": {
+      "dtype": "string",
+      "_type": "Value"
+    }
+  },
+  "homepage": "",
+  "license": "",
+  "size_in_bytes": 97020033,
+  "splits": {
+    "train": {
+      "name": "train",
+      "num_bytes": 64159546,
+      "num_examples": 118287,
+      "dataset_name": "coco2017"
+    },
+    "validation": {
+      "name": "validation",
+      "num_bytes": 2690360,
+      "num_examples": 5000,
+      "dataset_name": "coco2017"
+    }
+  },
+  "version": {
+    "version_str": "0.0.0",
+    "major": 0,
+    "minor": 0,
+    "patch": 0
+  }
+}
