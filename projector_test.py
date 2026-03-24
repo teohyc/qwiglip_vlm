@@ -1,0 +1,99 @@
+import torch
+import torch.nn as nn
+import random
+from datasets import load_from_disk
+from PIL import Image
+import matplotlib.pyplot as plt
+from transformers import AutoTokenizer, AutoProcessor, AutoModel, Qwen2ForCausalLM
+from vlm_model import MLPProjector, SiglipQwenVLM
+
+#configurations
+DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+
+DATASET_PATH = "coco_chat_dataset"
+PROJECTOR_PATH = "best_projector.pt"
+
+LLM_NAME = "Qwen/Qwen2-0.5B-Instruct"
+VISION_NAME = "google/siglip-base-patch16-224"
+
+NUM_IMAGE_TOKENS = 196
+
+#load tokenizer and processor
+tokenizer = AutoTokenizer.from_pretrained(LLM_NAME)
+processor = AutoProcessor.from_pretrained(VISION_NAME)
+
+tokenizer.pad_token = tokenizer.eos_token
+tokenizer.add_special_tokens({"additional_special_tokens": ["<image>"]})
+IMAGE_TOKEN_ID = tokenizer.convert_tokens_to_ids("<image>")
+
+#load models
+vision_model = AutoModel.from_pretrained(VISION_NAME).to(DEVICE)
+llm = Qwen2ForCausalLM.from_pretrained(LLM_NAME).to(DEVICE)
+llm.resize_token_embeddings(len(tokenizer))
+
+#generation function
+def generate(self, pixel_values, input_ids, attention_mask, max_new_tokens=50):
+        vision_outputs = self.vision_model.vision_model(pixel_values=pixel_values)
+        image_features = vision_outputs.last_hidden_state
+
+        projected = self.projector(image_features)
+        inputs_embeds = self.llm.get_input_embeddings()(input_ids)
+        projected = projected.to(inputs_embeds.dtype)
+
+        for b in range(input_ids.size(0)):
+            pos = torch.where(input_ids[b] == self.image_token_id)[0]
+            inputs_embeds[b, pos, :] = projected[b]
+
+        return self.llm.generate(
+            inputs_embeds=inputs_embeds,
+            attention_mask=attention_mask,
+            max_new_tokens=max_new_tokens,
+        )
+
+#load model
+model = SiglipQwenVLM(vision_model, llm, IMAGE_TOKEN_ID).to(DEVICE)
+model.load_state_dict(torch.load(PROJECTOR_PATH, map_location=DEVICE))
+
+model.eval()
+
+#load data
+dataset = load_from_disk(DATASET_PATH)
+dataset = dataset.train_test_split(test_size=0.05, seed=42)
+val_dataset = dataset["test"]
+
+sample = random.choice(val_dataset)
+#print caption and image path
+print("Caption:", sample["messages"][1]["content"])
+print("Image Path:", sample["image_path"])
+
+image = Image.open(sample["image_path"]).convert("RGB")
+
+# show image
+plt.imshow(image)
+plt.axis("off")
+plt.title("Input Image")
+plt.show()
+
+#input preparation
+image_block = " ".join(["<image>"] * NUM_IMAGE_TOKENS)
+
+prompt = f"USER: {image_block}\nDescribe the image.\nASSISTANT:"
+
+inputs = processor(images=image, return_tensors="pt")
+pixel_values = inputs["pixel_values"].to(DEVICE)
+
+tokenized = tokenizer(prompt, return_tensors="pt").to(DEVICE)
+
+#generate
+with torch.no_grad():
+    output_ids = model.generate(
+        pixel_values=pixel_values,
+        input_ids=tokenized["input_ids"],
+        attention_mask=tokenized["attention_mask"],
+        max_new_tokens=50,
+    )
+
+output_text = tokenizer.decode(output_ids[0], skip_special_tokens=True)
+
+print("\n=== Generated Caption ===")
+print(output_text)
