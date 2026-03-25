@@ -6,12 +6,14 @@ from PIL import Image
 import matplotlib.pyplot as plt
 from transformers import AutoTokenizer, AutoProcessor, AutoModel, Qwen2ForCausalLM
 from vlm_model import MLPProjector, SiglipQwenVLM
+from peft import LoraConfig, get_peft_model
+
 
 #configurations
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 DATASET_PATH = "coco_chat_dataset"
-PROJECTOR_PATH = "best_projector.pt"
+MODEL_PATH = "best_vlm.pt"
 
 LLM_NAME = "Qwen/Qwen2-0.5B-Instruct"
 VISION_NAME = "google/siglip-base-patch16-224"
@@ -31,28 +33,27 @@ vision_model = AutoModel.from_pretrained(VISION_NAME).to(DEVICE)
 llm = Qwen2ForCausalLM.from_pretrained(LLM_NAME).to(DEVICE)
 llm.resize_token_embeddings(len(tokenizer))
 
-#generation function
-def generate(self, pixel_values, input_ids, attention_mask, max_new_tokens=50):
-        vision_outputs = self.vision_model.vision_model(pixel_values=pixel_values)
-        image_features = vision_outputs.last_hidden_state
+#adding lora to qwen2
+lora_config = LoraConfig(
+    r=16,
+    lora_alpha=32,
+    target_modules=[
+        "q_proj",
+        "k_proj",
+        "v_proj",
+        "o_proj",
+    ],
+    lora_dropout=0.1,
+    bias="none",
+    task_type="CAUSAL_LM"
+)
 
-        projected = self.projector(image_features)
-        inputs_embeds = self.llm.get_input_embeddings()(input_ids)
-        projected = projected.to(inputs_embeds.dtype)
-
-        for b in range(input_ids.size(0)):
-            pos = torch.where(input_ids[b] == self.image_token_id)[0]
-            inputs_embeds[b, pos, :] = projected[b]
-
-        return self.llm.generate(
-            inputs_embeds=inputs_embeds,
-            attention_mask=attention_mask,
-            max_new_tokens=max_new_tokens,
-        )
+llm = get_peft_model(llm, lora_config)
+llm.print_trainable_parameters()
 
 #load model
 model = SiglipQwenVLM(vision_model, llm, IMAGE_TOKEN_ID).to(DEVICE)
-model.load_state_dict(torch.load(PROJECTOR_PATH, map_location=DEVICE))
+model.load_state_dict(torch.load(MODEL_PATH, map_location=DEVICE))
 
 model.eval()
 
