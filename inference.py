@@ -33,17 +33,15 @@ vision_model = AutoModel.from_pretrained(VISION_NAME).to(DEVICE)
 llm = Qwen2ForCausalLM.from_pretrained(LLM_NAME).to(DEVICE)
 llm.resize_token_embeddings(len(tokenizer))
 
-#adding lora to qwen2
+#adding lora to qwen2 (for final qwiglip model only)
 lora_config = LoraConfig(
-    r=32,
-    lora_alpha=64,
+    r=16,
+    lora_alpha=32,
     target_modules=[
         "q_proj",
         "k_proj",
         "v_proj",
         "o_proj",
-        "up_proj",
-        "down_proj",
     ],
     lora_dropout=0.1,
     bias="none",

@@ -16,7 +16,7 @@ class MLPProjector(nn.Module):
         return self.post_norm(self.net(self.pre_norm(x)))
 
 
-# ===== VLM MODEL =====
+
 class SiglipQwenVLM(nn.Module):
     def __init__(self, vision_model, llm, image_token_id):
         super().__init__()
