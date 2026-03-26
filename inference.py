@@ -13,7 +13,7 @@ from peft import LoraConfig, get_peft_model
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 DATASET_PATH = "coco_chat_dataset"
-MODEL_PATH = "best_vlm.pt"
+MODEL_PATH = "qwiglip_vlm.pt"
 
 LLM_NAME = "Qwen/Qwen2-0.5B-Instruct"
 VISION_NAME = "google/siglip-base-patch16-224"
@@ -35,13 +35,15 @@ llm.resize_token_embeddings(len(tokenizer))
 
 #adding lora to qwen2
 lora_config = LoraConfig(
-    r=16,
-    lora_alpha=32,
+    r=32,
+    lora_alpha=64,
     target_modules=[
         "q_proj",
         "k_proj",
         "v_proj",
         "o_proj",
+        "up_proj",
+        "down_proj",
     ],
     lora_dropout=0.1,
     bias="none",
@@ -78,7 +80,7 @@ plt.show()
 #input preparation
 image_block = " ".join(["<image>"] * NUM_IMAGE_TOKENS)
 
-prompt = f"USER: {image_block}\nDescribe the image.\nASSISTANT:"
+prompt = f"USER: {image_block}\nGive a short natural caption of the image.\nASSISTANT:"
 
 inputs = processor(images=image, return_tensors="pt")
 pixel_values = inputs["pixel_values"].to(DEVICE)
