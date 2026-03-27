@@ -33,7 +33,6 @@ vision_model = AutoModel.from_pretrained(VISION_NAME).to(DEVICE)
 llm = Qwen2ForCausalLM.from_pretrained(LLM_NAME).to(DEVICE)
 llm.resize_token_embeddings(len(tokenizer))
 
-#adding lora to qwen2 (for final qwiglip model only)
 lora_config = LoraConfig(
     r=16,
     lora_alpha=32,
@@ -78,7 +77,7 @@ plt.show()
 #input preparation
 image_block = " ".join(["<image>"] * NUM_IMAGE_TOKENS)
 
-prompt = f"USER: {image_block}\nGive a short natural caption of the image.\nASSISTANT:"
+prompt = f"USER: {image_block}\nGive a short, single-sentence caption of the image. Do not add explanations.\nASSISTANT:"
 
 inputs = processor(images=image, return_tensors="pt")
 pixel_values = inputs["pixel_values"].to(DEVICE)
@@ -95,6 +94,7 @@ with torch.no_grad():
     )
 
 output_text = tokenizer.decode(output_ids[0], skip_special_tokens=True)
+output_text = output_text.split(".")[0] + "."
 
 print("\n=== Generated Caption ===")
 print(output_text)
