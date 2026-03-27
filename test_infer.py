@@ -77,7 +77,7 @@ plt.show()
 #input preparation
 image_block = " ".join(["<image>"] * NUM_IMAGE_TOKENS)
 
-prompt = f"USER: {image_block}\nGive a short, single-sentence caption of the image. Do not add explanations.\nASSISTANT:"
+prompt = f"USER: {image_block}\nGive a few short sentences describing the image. Do not add explanations.\nASSISTANT:"
 
 inputs = processor(images=image, return_tensors="pt")
 pixel_values = inputs["pixel_values"].to(DEVICE)
@@ -94,7 +94,9 @@ with torch.no_grad():
     )
 
 output_text = tokenizer.decode(output_ids[0], skip_special_tokens=True)
-output_text = output_text.split(".")[0] + "."
+#only keep the first 4 sentences
+output_text = output_text.split(".")[:4]
+output_text = ".".join(output_text) + "."
 
 print("\n=== Generated Caption ===")
 print(output_text)
