@@ -1,0 +1,2 @@
+A Vision-Language Model (Qwiglip...name given by myself :)) consisisting of the Google SigLip vision encoder and 0.5B Qwen2 LLM decoder models. The 2 models are bridged together by a LLaVa-inspired vision-to-language token MLP projector. Trained with 10k image-caption pair from COCO datasets. Ability in general object recognition, scene description and natural language task with limited ability in fine-grained detail recognition and rare object identification
+Dataset: https://huggingface.co/datasets/phiyodr/coco2017
