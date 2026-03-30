@@ -53,7 +53,7 @@ model.load_state_dict(torch.load(MODEL_PATH, map_location=DEVICE))
 model.eval()
 
 #load image from directory
-image_path = "test_image.jpg"  
+image_path = "test_image_2.jpg"  
 image = Image.open(image_path).convert("RGB")
 
 #input preparation
