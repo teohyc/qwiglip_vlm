@@ -50,7 +50,7 @@ class SiglipQwenVLM(nn.Module):
 
         return outputs
 
-    def generate(self, pixel_values, input_ids, attention_mask, max_new_tokens=50):
+    def generate(self, pixel_values, input_ids, attention_mask, max_new_tokens=35, temperature=0.5, top_p=0.85, no_repeat_ngram_size=3, repetition_penalty=1.2):
         vision_outputs = self.vision_model.vision_model(pixel_values=pixel_values)
         image_features = vision_outputs.last_hidden_state
 
@@ -66,4 +66,8 @@ class SiglipQwenVLM(nn.Module):
             inputs_embeds=inputs_embeds,
             attention_mask=attention_mask,
             max_new_tokens=max_new_tokens,
+            temperature=temperature,
+            top_p=top_p,
+            no_repeat_ngram_size=no_repeat_ngram_size,
+            repetition_penalty=repetition_penalty,
         )

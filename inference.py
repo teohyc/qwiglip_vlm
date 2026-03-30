@@ -1,13 +1,9 @@
 import torch
 import torch.nn as nn
-import random
-from datasets import load_from_disk
 from PIL import Image
-import matplotlib.pyplot as plt
 from transformers import AutoTokenizer, AutoProcessor, AutoModel, Qwen2ForCausalLM
 from vlm_model import MLPProjector, SiglipQwenVLM
 from peft import LoraConfig, get_peft_model
-
 
 #configurations
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
@@ -56,23 +52,9 @@ model.load_state_dict(torch.load(MODEL_PATH, map_location=DEVICE))
 
 model.eval()
 
-#load data
-dataset = load_from_disk(DATASET_PATH)
-dataset = dataset.train_test_split(test_size=0.05, seed=42)
-val_dataset = dataset["test"]
-
-sample = random.choice(val_dataset)
-#print caption and image path
-print("Caption:", sample["messages"][1]["content"])
-print("Image Path:", sample["image_path"])
-
-image = Image.open(sample["image_path"]).convert("RGB")
-
-# show image
-plt.imshow(image)
-plt.axis("off")
-plt.title("Input Image")
-plt.show()
+#load image from directory
+image_path = "test_image.jpg"  
+image = Image.open(image_path).convert("RGB")
 
 #input preparation
 image_block = " ".join(["<image>"] * NUM_IMAGE_TOKENS)
