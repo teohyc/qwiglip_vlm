@@ -39,7 +39,7 @@ lora_config = LoraConfig(
         "v_proj",
         "o_proj",
     ],
-    lora_dropout=0.1,
+    lora_dropout=0.05,
     bias="none",
     task_type="CAUSAL_LM"
 )

@@ -43,7 +43,7 @@ lora_config = LoraConfig(
         "v_proj",
         "o_proj",
     ],
-    lora_dropout=0.1,
+    lora_dropout=0.05,
     bias="none",
     task_type="CAUSAL_LM"
 )
@@ -77,7 +77,7 @@ plt.show()
 #input preparation
 image_block = " ".join(["<image>"] * NUM_IMAGE_TOKENS)
 
-prompt = f"USER: {image_block}\nDescribe the image in 2–3 short sentences. Only mention details that are clearly visible. Do not guess or infer.\nASSISTANT:"
+prompt = f"USER: {image_block}\nDescribe the image in 2-3 short sentences. Be accurate and only mention clearly visible details.\nASSISTANT:"
 
 inputs = processor(images=image, return_tensors="pt")
 pixel_values = inputs["pixel_values"].to(DEVICE)
