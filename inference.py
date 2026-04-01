@@ -1,6 +1,4 @@
 import torch
-import random
-from datasets import load_from_disk
 from PIL import Image
 import matplotlib.pyplot as plt
 from transformers import AutoTokenizer, AutoProcessor, AutoModel, Qwen2ForCausalLM
@@ -10,8 +8,6 @@ from vlm_model import MLPProjector, SiglipQwenVLM
 
 #configurations
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-
-DATASET_PATH = "coco_chat_dataset"
 
 LLM_NAME = "Qwen/Qwen2-0.5B-Instruct"
 VISION_NAME = "google/siglip-base-patch16-224"
@@ -50,7 +46,7 @@ model.projector = projector
 model.eval()
 
 #load image from directory
-image_path = "test_image_2.jpg"  
+image_path = "test_image.jpg"  #change to your test image path
 image = Image.open(image_path).convert("RGB")
 
 #input preparation
