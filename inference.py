@@ -72,9 +72,9 @@ with torch.no_grad():
         pixel_values=pixel_values,
         input_ids=tokenized["input_ids"],
         attention_mask=tokenized["attention_mask"],
-        max_new_tokens=35,
-        temperature=0.5,
-        top_p=0.85,
+        max_new_tokens=60,
+        temperature=0.7,
+        top_p=0.9,
         no_repeat_ngram_size=3,
         repetition_penalty=1.2,
     )
