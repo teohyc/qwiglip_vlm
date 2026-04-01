@@ -1,18 +1,23 @@
 import torch
-import torch.nn as nn
+import random
+from datasets import load_from_disk
 from PIL import Image
+import matplotlib.pyplot as plt
 from transformers import AutoTokenizer, AutoProcessor, AutoModel, Qwen2ForCausalLM
+from peft import PeftModel
+
 from vlm_model import MLPProjector, SiglipQwenVLM
-from peft import LoraConfig, get_peft_model
 
 #configurations
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 DATASET_PATH = "coco_chat_dataset"
-MODEL_PATH = "qwiglip_vlm.pt"
 
 LLM_NAME = "Qwen/Qwen2-0.5B-Instruct"
 VISION_NAME = "google/siglip-base-patch16-224"
+
+LORA_PATH = "lora_adapter"
+PROJECTOR_PATH = "projector.pt"
 
 NUM_IMAGE_TOKENS = 196
 
@@ -24,32 +29,24 @@ tokenizer.pad_token = tokenizer.eos_token
 tokenizer.add_special_tokens({"additional_special_tokens": ["<image>"]})
 IMAGE_TOKEN_ID = tokenizer.convert_tokens_to_ids("<image>")
 
+
 #load models
 vision_model = AutoModel.from_pretrained(VISION_NAME).to(DEVICE)
+
 llm = Qwen2ForCausalLM.from_pretrained(LLM_NAME).to(DEVICE)
 llm.resize_token_embeddings(len(tokenizer))
 
-#attach lora
-lora_config = LoraConfig(
-    r=16,
-    lora_alpha=32,
-    target_modules=[
-        "q_proj",
-        "k_proj",
-        "v_proj",
-        "o_proj",
-    ],
-    lora_dropout=0.05,
-    bias="none",
-    task_type="CAUSAL_LM"
-)
+#load lora adapter
+llm = PeftModel.from_pretrained(llm, LORA_PATH)
 
-llm = get_peft_model(llm, lora_config)
+#load projector
+projector = MLPProjector(vision_model.config.vision_config.hidden_size, llm.config.hidden_size)  
+projector.load_state_dict(torch.load(PROJECTOR_PATH, map_location=DEVICE))
+projector.to(DEVICE)
 
-#load model
+#assemble QwigLip VLM
 model = SiglipQwenVLM(vision_model, llm, IMAGE_TOKEN_ID).to(DEVICE)
-model.load_state_dict(torch.load(MODEL_PATH, map_location=DEVICE))
-
+model.projector = projector
 model.eval()
 
 #load image from directory
