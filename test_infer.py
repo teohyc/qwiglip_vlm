@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from transformers import AutoTokenizer, AutoProcessor, AutoModel, Qwen2ForCausalLM
 from peft import PeftModel
 
-from vlm_model import MLPProjector, SiglipQwenVLM
+from vlm_model import ResMLPProjector, SiglipQwenVLM
 
 #configurations
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
@@ -40,7 +40,7 @@ llm.resize_token_embeddings(len(tokenizer))
 llm = PeftModel.from_pretrained(llm, LORA_PATH)
 
 #load projector
-projector = MLPProjector(vision_model.config.vision_config.hidden_size, llm.config.hidden_size)  
+projector = ResMLPProjector(vision_model.config.vision_config.hidden_size, llm.config.hidden_size)  
 projector.load_state_dict(torch.load(PROJECTOR_PATH, map_location=DEVICE))
 projector.to(DEVICE)
 
