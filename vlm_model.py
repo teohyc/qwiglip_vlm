@@ -11,21 +11,21 @@ class ResMLPProjector(nn.Module):
             nn.LayerNorm(llm_hidden_size),
             nn.Linear(llm_hidden_size, llm_hidden_size * 2),
             nn.GELU(),
+            nn.Dropout(0.1),
             nn.Linear(llm_hidden_size * 2, llm_hidden_size),
-            nn.Dropout(0.1)
         )
 
         self.block2 = nn.Sequential(
             nn.LayerNorm(llm_hidden_size),
             nn.Linear(llm_hidden_size, llm_hidden_size),
             nn.GELU(),
+            nn.Dropout(0.1),
             nn.Linear(llm_hidden_size, llm_hidden_size),
-            nn.Dropout(0.1)
         )
 
     def forward(self, x):
-        x = self.input_proj(x)
-
+        x = self.input_proj(x) #project to llm hidden space
+        
         x = x + self.block1(x)
         x = x + self.block2(x)
 
