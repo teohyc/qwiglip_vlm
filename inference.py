@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from transformers import AutoTokenizer, AutoProcessor, AutoModel, Qwen2ForCausalLM
 from peft import PeftModel
 
-from vlm_model import MLPProjector, SiglipQwenVLM
+from vlm_model import ResMLPProjector, SiglipQwenVLM
 
 #configurations
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
@@ -12,7 +12,7 @@ DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 LLM_NAME = "Qwen/Qwen2-0.5B-Instruct"
 VISION_NAME = "google/siglip-base-patch16-224"
 
-LORA_PATH = "lora_adapter"
+LORA_PATH = "vqa_lora_adapter"
 PROJECTOR_PATH = "projector.pt"
 
 NUM_IMAGE_TOKENS = 196
@@ -36,7 +36,7 @@ llm.resize_token_embeddings(len(tokenizer))
 llm = PeftModel.from_pretrained(llm, LORA_PATH)
 
 #load projector
-projector = MLPProjector(vision_model.config.vision_config.hidden_size, llm.config.hidden_size)  
+projector = ResMLPProjector(vision_model.config.vision_config.hidden_size, llm.config.hidden_size)  
 projector.load_state_dict(torch.load(PROJECTOR_PATH, map_location=DEVICE))
 projector.to(DEVICE)
 
@@ -52,7 +52,11 @@ image = Image.open(image_path).convert("RGB")
 #input preparation
 image_block = " ".join(["<image>"] * NUM_IMAGE_TOKENS)
 
+#for normal caption image
 prompt = f"USER: {image_block}\nDescribe the image in 2–3 short sentences. Only mention details that are clearly visible. Do not guess or infer.\nASSISTANT:"
+
+#for vqa
+#prompt = f"USER: {image_block}\n{input('Question: ')}\nASSISTANT:"
 
 inputs = processor(images=image, return_tensors="pt")
 pixel_values = inputs["pixel_values"].to(DEVICE)
