@@ -3,12 +3,12 @@ from transformers import AutoTokenizer
 import os
 
 # ================= CONFIG =================
-HF_USERNAME = "teohyc"   # change this
-REPO_NAME = "QwigLip-vlm"
+HF_USERNAME = "teohyc"   
+REPO_NAME = "QwigLip-VQA"
 
 LLM_NAME = "Qwen/Qwen2-0.5B-Instruct"
 
-LORA_PATH = "lora_adapter"
+LORA_PATH = "vqa_lora_adapter"
 PROJECTOR_PATH = "projector.pt"
 
 TEMP_DIR = "hf_upload"
@@ -38,10 +38,26 @@ tokenizer.save_pretrained(os.path.join(TEMP_DIR, "tokenizer"))
 
 #readme
 readme = f"""
-# Qwiglip VLM (Qwen2 + SigLIP)
+---
+license: mit
+datasets:
+- phiyodr/coco2017
+- landersanmi/VQAv2
+language:
+- en
+metrics:
+- accuracy
+base_model:
+- Qwen/Qwen2-0.5B-Instruct
+- google/siglip-base-patch16-224
+library_name: transformers
+pipeline_tag: image-text-to-text
+---
 
-Custom Vision-Language Model built from scratch. Inspired by LLaVA VLM architecture, but with a custom MLP projector and LoRA fine-tuning for efficient training.
-Training data from https://huggingface.co/datasets/phiyodr/coco2017
+# Qwiglip VQA (Qwen2 + SigLIP)
+
+Custom Vision-Question-Answering Model built from scratch. Built upon earlier QwigLip-VLM with additional 5k data from, but with a custom MLP projector and LoRA fine-tuning for efficient training.
+Training data from https://huggingface.co/datasets/landersanmi/VQAv2 and https://huggingface.co/datasets/phiyodr/coco2017
 
 ## Components
 - Base LLM: {LLM_NAME}
@@ -66,7 +82,7 @@ DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 LLM_NAME = "Qwen/Qwen2-0.5B-Instruct"
 VISION_NAME = "google/siglip-base-patch16-224"
 
-LORA_PATH = "lora_adapter"
+LORA_PATH = "vqa_lora_adapter"
 PROJECTOR_PATH = "projector.pt"
 
 NUM_IMAGE_TOKENS = 196
