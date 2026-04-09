@@ -6,12 +6,12 @@ from vlm_model import SiglipQwenVLM
 #configurations
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
-MODEL_PATH = "qwiglip_vlm.pt"
+MODEL_PATH = "qwiglip_vqa.pt"
 
 LLM_NAME = "Qwen/Qwen2-0.5B-Instruct"
 VISION_NAME = "google/siglip-base-patch16-224"
 
-OUTPUT_LORA_DIR = "lora_adapter"
+OUTPUT_LORA_DIR = "vqa_lora_adapter"
 OUTPUT_PROJECTOR_PATH = "projector.pt"
 
 #load tokenizer
@@ -30,8 +30,8 @@ llm.resize_token_embeddings(len(tokenizer))
 # lora
 print("Rebuilding LoRA structure...")
 lora_config = LoraConfig(
-    r=16,
-    lora_alpha=32,
+    r=32,
+    lora_alpha=64,
     target_modules=[
         "q_proj",
         "k_proj",
@@ -54,9 +54,11 @@ model.load_state_dict(state_dict)
 
 model.eval()
 
+'''
 #extract projector
 print("Saving projector")
 torch.save(model.projector.state_dict(), OUTPUT_PROJECTOR_PATH)
+'''
 
 #extract lora
 print("Saving LoRA adapter...")
