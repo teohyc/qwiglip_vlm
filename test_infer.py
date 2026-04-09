@@ -11,12 +11,12 @@ from vlm_model import ResMLPProjector, SiglipQwenVLM
 #configurations
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
-DATASET_PATH = "coco_chat_dataset"
+DATASET_PATH = "vqa5k_chat_dataset"
 
 LLM_NAME = "Qwen/Qwen2-0.5B-Instruct"
 VISION_NAME = "google/siglip-base-patch16-224"
 
-LORA_PATH = "lora_adapter"
+LORA_PATH = "vqa_lora_adapter"
 PROJECTOR_PATH = "projector.pt"
 
 NUM_IMAGE_TOKENS = 196
@@ -108,3 +108,4 @@ for _ in range(7):
 
     print("\n=== Generated Caption ===")
     print(output_text)
+    print("\n=========================\n")
