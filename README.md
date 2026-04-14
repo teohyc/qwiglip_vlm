@@ -1,4 +1,5 @@
 Test out My Model: https://huggingface.co/teohyc/QwigLip-vlm & https://huggingface.co/teohyc/QwigLip-VQA
+DEMO VIDEO: https://youtu.be/Owh3wFMH9wA
 
 A Vision-Language Model (Qwiglip...name given by myself :)) consisisting of the Google SigLip vision encoder and 0.5B Qwen2 LLM decoder models. The 2 models are bridged together by a LLaVa-inspired vision-to-language token MLP projector. Trained with 20k image-caption pair from COCO datasets. Ability in general object recognition, scene description and natural language task with limited ability in fine-grained detail recognition and rare object identification. Trained with LoRA on Qwen2 and full training on the MLP projector, the SigLip model is completely frozen.
 Dataset: https://huggingface.co/datasets/phiyodr/coco2017 & https://huggingface.co/datasets/landersanmi/VQAv2
